@@ -1,20 +1,25 @@
 import cv2
 import numpy as np
 from centroidtracker import CentroidTracker
+import imutils
 
 
 cap = cv2.VideoCapture(0)
-proto = r"./deploy.prototxt"
-model = r"res10_300x300_ssd_iter_140000.caffemodel"
+proto = r"Caffemodel/deploy.prototxt"
+model = r"Caffemodel/res10_300x300_ssd_iter_140000.caffemodel"
 net = cv2.dnn.readNetFromCaffe(proto, model)
 
 while(True):
     ret, frame = cap.read()
+    # 調整螢幕尺寸 FP減少
+    frame = imutils.resize(frame, width=400)
+    # blur 邊緣模糊化
     avg = cv2.blur(frame, (4, 4))
     avg_float = np.float32(avg)
 
     # blobFromImage 对图像进行预处理，包括减均值，比例缩放，裁剪，交换通道等，返回一个4通道的blob(blob可以简单理解为一个N维的数组，用于神经网络的输入)
     (H, W) = frame.shape[:2]
+    # print(H, W)
     blob = cv2.dnn.blobFromImage(frame, 1.0, (W, H), (104.0, 177.0, 123.0))
     net.setInput(blob)
     detections = net.forward()
